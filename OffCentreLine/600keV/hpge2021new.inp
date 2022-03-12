@@ -1,0 +1,76 @@
+TITLE
+Simulation of HPGe detector for gamma detection v2021
+GLOBAL                                          1.        1.
+DEFAULTS                                                              EM-CASCA
+* 1MeV = 0.001 GeV, 1keV = 0.001MeV = 0.000001GeV
+* 1MeV below
+BEAM         -0.0006                                                1.PHOTON
+BEAMPOS          2.0       0.0      -25.
+GEOBEGIN                                                              COMBNAME
+    0    0          
+* Black body
+SPH blkbody    0.0 0.0 0.0 1000.
+SPH shell1     0.0 0.0 0.0 100.
+ZCC hpge       0.0 0.0 2.98
+ZCC dead       0.0 0.0 3.05
+ZCC capout     0.0 0.0 4.05
+ZCC capin      0.0 0.0 3.95
+ZCC vac        0.0 0.0 0.65
+XYP plane1     0.0
+XYP plane11    0.1
+XYP plane2     0.4
+XYP plane21    0.47
+XYP plane3     1.86
+XYP plane4     5.86
+END
+* Black hole
+BLKBODY      5 +blkbody -shell1
+* Space before aluminium cap of target cylinder
+SPACELO      5 +shell1 +plane1
+* Aluminium cap
+CAP          5 (+capout -plane1 +plane4) - (capin -plane11 +plane4)
+* Space around and after aluminium cap of target cylinder
+SPACEHI      5 +shell1 -plane1 +plane4 -capout | +shell1 -plane4
+* Space between cap and target detector
+SPACEIN      5 +capin -plane11 + plane2 | +capin -plane2 +plane4 -dead
+* Ge dead layer
+DEAD         5 +dead -plane2 + plane21 |+dead -plane21 + plane4 -hpge
+* Target
+TARGET       5 +hpge -plane21 +plane4 - (vac -plane3 +plane4)
+HOLE         5 +vac -plane3 +plane4
+END
+GEOEND
+MATERIAL         32.     72.61     5.323       26.                    GERMANIU
+MATERIAL          13 26.981538     2.699       10.                    ALUMINUM
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+ASSIGNMA    BLCKHOLE   BLKBODY
+ASSIGNMA      VACUUM   SPACELO
+ASSIGNMA    ALUMINUM       CAP
+ASSIGNMA      VACUUM   SPACEHI
+ASSIGNMA      VACUUM   SPACEIN
+ASSIGNMA    GERMANIU      DEAD
+ASSIGNMA    GERMANIU    TARGET
+ASSIGNMA      VACUUM      HOLE
+*EVENTYPE
+SCORE         ENERGY  EM-ENRGY
+DETECT           0.0     1.E-9     0.004     1.E-9        1.    TARGETMyhpge
+USRBDX            1.    PHOTON      -21.   SPACELO   SPACEHI        1.incgam
+USRBDX         0.004       0.0      300.                            1. &
+USRBDX            1.    PHOTON      -22.    TARGET   SPACEHI        1.targam
+USRBDX         0.003       0.0      300.                            1. &
+USRBDX            1.  ELECTRON      -23.    TARGET   SPACEHI        1.tarele
+USRBDX         0.003       0.0      300.                            1. &
+USRBIN            10    PHOTON      -71.        5.        5.       10.bingam1
+USRBIN           -5.       -5.       -2.      100.        1.      120. &
+USRBIN            10    PHOTON      -72.       30.       30.       30.bingam2
+USRBIN          -30.      -30.      -10.      100.        1.      120. &
+USRBIN            10  ELECTRON      -73.        5.        5.       10.binele
+USRBIN           -5.       -5.      -10.      100.        1.      120. &
+USRBIN            10    ENERGY      -74.        5.        5.       10.binene
+USRBIN           -5.       -5.      -10.      100.        1.      120. &
+USRBIN            10  BEAMPART      -75.        5.        5.       10.binbeam
+USRBIN           -5.       -5.      -10.      100.        1.      120. &
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+RANDOMIZ          1.       123
+START        200000.                                     0.0
+STOP
