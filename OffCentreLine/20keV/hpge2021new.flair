@@ -1,0 +1,243 @@
+# flair project file
+Version: 300
+Mode: fluka
+Title: Simulation of HPGe detector for gamma detection v2021
+md5: 0dc433dd6ecdf2658723fab367dbbee1
+Input:
+TITLE
+	Simulation of HPGe detector for gamma detection v2021
+GLOBAL ,,,, 1. 1.
+DEFAULTS EM-CASCA
+*1MeV = 0.001 GeV, 1keV = 0.001MeV = 0.000001GeV
+*1MeV below
+BEAM PHOTON -2E-05,,,,, 1.
+	@select=1
+BEAMPOS , 2.0 0.0 -25.
+GEOBEGIN COMBNAME
+*Black body
+SPH blkbody 0.0 0.0 0.0 1000.
+SPH shell1 0.0 0.0 0.0 100.
+ZCC hpge 0.0 0.0 2.98
+ZCC dead 0.0 0.0 3.05
+ZCC capout 0.0 0.0 4.05
+ZCC capin 0.0 0.0 3.95
+ZCC vac 0.0 0.0 0.65
+XYP plane1 0.0
+XYP plane11 0.1
+XYP plane2 0.4
+XYP plane21 0.47
+XYP plane3 1.86
+XYP plane4 5.86
+END
+*Black hole
+REGION BLKBODY 5
+	+blkbody -shell1
+*Space before aluminium cap of target cylinder
+REGION SPACELO 5
+	+shell1 +plane1
+*Aluminium cap
+REGION CAP 5
+	(+capout -plane1 +plane4) - (capin -plane11 +plane4)
+*Space around and after aluminium cap of target cylinder
+REGION SPACEHI 5
+	+shell1 -plane1 +plane4 -capout | +shell1 -plane4
+*Space between cap and target detector
+REGION SPACEIN 5
+	+capin -plane11 + plane2 | +capin -plane2 +plane4 -dead
+*Ge dead layer
+REGION DEAD 5
+	+dead -plane2 + plane21 |+dead -plane21 + plane4 -hpge
+*Target
+REGION TARGET 5
+	+hpge -plane21 +plane4 - (vac -plane3 +plane4)
+REGION HOLE 5
+	+vac -plane3 +plane4
+END
+GEOEND
+MATERIAL GERMANIU 32. 72.61 5.323 26.
+MATERIAL ALUMINUM 13 26.981538 2.699 10.
+*..+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+ASSIGNMA , BLCKHOLE BLKBODY
+ASSIGNMA , VACUUM SPACELO
+ASSIGNMA , ALUMINUM CAP
+ASSIGNMA , VACUUM SPACEHI
+ASSIGNMA , VACUUM SPACEIN
+ASSIGNMA , GERMANIU DEAD
+ASSIGNMA , GERMANIU TARGET
+ASSIGNMA , VACUUM HOLE
+!EVENTYPE
+SCORE , ENERGY EM-ENRGY
+DETECT Myhpge 0.0 1.E-9 0.004 1.E-9 1. TARGET
+USRBDX incgam 1. PHOTON -21. SPACELO SPACEHI 1. 0.004 0.0 300.,,, 1.
+USRBDX targam 1. PHOTON -22. TARGET SPACEHI 1. 0.003 0.0 300.,,, 1.
+USRBDX tarele 1. ELECTRON -23. TARGET SPACEHI 1. 0.003 0.0 300.,,, 1.
+USRBIN bingam1 10 PHOTON -71. 5. 5. 10. -5. -5. -2. 100. 1. 120.
+USRBIN bingam2 10 PHOTON -72. 30. 30. 30. -30. -30. -10. 100. 1. 120.
+USRBIN binele 10 ELECTRON -73. 5. 5. 10. -5. -5. -10. 100. 1. 120.
+USRBIN binene 10 ENERGY -74. 5. 5. 10. -5. -5. -10. 100. 1. 120.
+USRBIN binbeam 10 BEAMPART -75. 5. 5. 10. -5. -5. -10. 100. 1. 120.
+*..+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+RANDOMIZ , 1. 123
+START , 200000.,,,, 0.0
+STOP
+EndInput
+
+Page: Flair
+plotengine: Gnuplot
+
+# Run information
+Run: <default>
+	Status:   3
+	StartRun: 1647048115
+End
+Geometry: Geometry
+	Layer: 3D
+		3D: 1
+		3D._visible: 1
+		3D.edgedetect: 1
+		3D.projection: 1
+		Options.viewport: 0
+		Palette: 1
+		Palette._visible: 1
+		Show: 0
+		Show.lattice: 1
+		Show.voxel: 1
+		Usrbin: 1
+		Usrbin._visible: 1
+	End
+End
+
+# Plots information
+Plot: Red
+	Type: Geometry
+	basisu: 0 0 1
+	basisv: 1 0 0
+	coord: Z-X
+	extends: 19.3807 9.7513
+	grid: 0
+	layer: Media
+	origin: -0.255519 0 1.48096
+End
+Plot: Green
+	Type: Geometry
+	basisu: 0.836516 0.0173377 0.547668
+	basisv: 0.224144 0.901221 -0.370891
+	extends: 19.3807 9.77178
+	layer: 3D
+	origin: -6.26981 6.31554 -7.82615
+End
+Plot: Blue
+	Type: Geometry
+	basisu: 0 0 1
+	coord: Z-Y
+	extends: 33.4898 16.78
+	layer: Media
+	origin: 0 0.38645 -2.37897
+End
+Plot: Magenta
+	Type: Geometry
+	coord: X-Y
+	extends: 16.1506 8.10923
+	grid: 0
+	layer: 3D
+End
+Plot: hpge2021new_17_plot
+	Type: USR-1D
+	file.0: hpge2021new_17_tab.lis
+	grid: 0
+	lc.0: red
+	lw.0: 2
+	name.0: Detector 1
+	ndetectors: 1
+	title: USR-1D hpge2021new 17
+	x.0: 2
+	xlog: 1
+	y.0: 0
+	ylog: 1
+End
+Plot: hpge2021new_21_plot
+	Type: USR-1D
+	file.0: hpge2021new_21_tab.lis
+	lc.0: red
+	lw.0: 2
+	name.0: Detector 1
+	ndetectors: 1
+	title: USR-1D hpge2021new 21
+	x.0: 2
+	xlog: 1
+	y.0: 0
+	ylog: 1
+End
+Plot: hpge2021new_22_plot
+	Type: USR-1D
+	file.0: hpge2021new_22_tab.lis
+	lc.0: red
+	lw.0: 2
+	name.0: Detector 1
+	ndetectors: 1
+	title: USR-1D hpge2021new 22
+	x.0: 2
+	xlog: 1
+	y.0: 0
+	ylog: 1
+End
+Plot: hpge2021new_23_plot
+	Type: USR-1D
+	file.0: hpge2021new_23_tab.lis
+	lc.0: red
+	lw.0: 2
+	name.0: Detector 1
+	ndetectors: 1
+	title: USR-1D hpge2021new 23
+	x.0: 2
+	xlog: 1
+	y.0: 0
+	ylog: 1
+End
+Plot: hpge2021new_71_plot
+	Type: USRBIN
+	cblog: 1
+	cbtics: 1
+	datafile: hpge2021new_71.bnn
+	grid: 0
+	hist: 2D Projection
+	int: 2.2285140966540280
+	max: 1.00496018
+	min: 6.26445451E-10
+	proj: Y
+	title: USRBIN hpge2021new 71
+End
+Plot: hpge2021new_72_plot
+	Type: USRBIN
+	cblog: 1
+	cbtics: 1
+	datafile: hpge2021new_72.bnn
+	title: USRBIN hpge2021new 72
+End
+Plot: hpge2021new_73_plot
+	Type: USRBIN
+	cblog: 1
+	cbtics: 1
+	datafile: hpge2021new_73.bnn
+	title: USRBIN hpge2021new 73
+End
+Plot: hpge2021new_74_plot
+	Type: USRBIN
+	cblog: 1
+	cbtics: 1
+	datafile: hpge2021new_74.bnn
+	grid: 0
+	hist: 2D Projection
+	int: 1.9842552881720895E-005
+	max: 6.71981397E-05
+	min: 7.75536926E-12
+	proj: Y
+	title: USRBIN hpge2021new 74
+End
+Plot: hpge2021new_75_plot
+	Type: USRBIN
+	cblog: 1
+	cbtics: 1
+	datafile: hpge2021new_75.bnn
+	title: USRBIN hpge2021new 75
+End
